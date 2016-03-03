@@ -1,0 +1,41 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>hu.mit.bme.trezsor</groupId>
+  <artifactId>InventedPendulumLearning</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  
+    <repositories>
+		<repository>
+			<id>jsi.sourceforge.net</id>
+			<name>sourceforge jsi repository</name>
+			<url>http://sourceforge.net/projects/jsi/files/m2_repo</url>
+		</repository>
+	</repositories>
+	
+	<dependencies>
+		<dependency>
+  			<groupId>net.sourceforge.jsi</groupId>
+  			<artifactId>jsi</artifactId>
+  			<version>1.0.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.12</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>net.sf.trove4j</groupId>
+			<artifactId>trove4j</artifactId>
+			<version>3.0.3</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.6</version>
+		</dependency>		
+  	</dependencies>
+  	
+</project>
