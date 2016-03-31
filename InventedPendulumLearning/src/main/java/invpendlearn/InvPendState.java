@@ -21,6 +21,8 @@ public class InvPendState extends RLState {
 		} else {
 			this.angle = angle;
 		}
+		
+		this.reward = Math.cos(this.angle/2);
 	}
 
 	public double getAngVel() {
@@ -60,7 +62,7 @@ public class InvPendState extends RLState {
 		angularVelocity = 0.0;
 		uncertainity = new double[] { 0.0, 0.0 };
 		utility = 0.0;
-		reward = 1.0;
+		reward = 0.0;
 	}
 
 	public InvPendState(double ang, double angVel) {
@@ -75,7 +77,9 @@ public class InvPendState extends RLState {
 		this.angularVelocity = angVel;
 		this.uncertainity = new double[] { 0.0, 0.0 };
 		this.utility = 0.0;
-
+		this.reward = Math.cos(this.angle/2);
+		
+		/*
 		if (Math.PI - Math.abs(this.angle) < Math.PI / 36) {
 			//this.reward = Math.PI / 36 - (Math.PI - Math.abs(this.angle)) / Math.PI / 36 - 0.1 * Math.abs(this.angularVelocity);
 			this.reward = Math.cos(this.angle) * -1;
@@ -83,7 +87,7 @@ public class InvPendState extends RLState {
 			//ne legyen negativ jutalom vagy csak nagyon nagyon kicsi
 			//this.reward = -0.1;
 			this.reward = 0.0;
-		}
+		}*/
 	}
 
 	public InvPendState(double ang, double angVel, double[] unc) {
@@ -98,15 +102,16 @@ public class InvPendState extends RLState {
 		this.angularVelocity = angVel;
 		this.uncertainity = unc;
 		this.utility = 0.0;
+		this.reward = Math.cos(this.angle/2);
 		
-		if (Math.PI - Math.abs(this.angle) < Math.PI / 36) {
+		/*if (Math.PI - Math.abs(this.angle) < Math.PI / 36) {
 			//this.reward = Math.PI / 36 - (Math.PI - Math.abs(this.angle)) / Math.PI / 36 - 0.1 * Math.abs(this.angularVelocity);
 			this.reward = Math.cos(this.angle) * -1;
 		} else {
 			//ne legyen negativ jutalom vagy csak nagyon nagyon kicsi
 			//this.reward = -0.1;
 			this.reward = 0.0;
-		}
+		}*/
 	}
 
 	public InvPendState(double ang, double angVel, double[] unc, double util) {
@@ -121,15 +126,16 @@ public class InvPendState extends RLState {
 		this.angularVelocity = angVel;
 		this.uncertainity = unc;
 		this.utility = util;
+		this.reward = Math.cos(this.angle/2);
 		
-		if (Math.PI - Math.abs(this.angle) < Math.PI / 36) {
+		/*if (Math.PI - Math.abs(this.angle) < Math.PI / 36) {
 			//this.reward = Math.PI / 36 - (Math.PI - Math.abs(this.angle)) / Math.PI / 36 - 0.1 * Math.abs(this.angularVelocity);
 			this.reward = Math.cos(this.angle) * -1;
 		} else {
 			//ne legyen negativ jutalom vagy csak nagyon nagyon kicsi
 			//this.reward = -0.1;
 			this.reward = 0.0;
-		}
+		}*/
 	}
 	
 	public InvPendState(double ang, double angVel, double[] unc, double util, double rew) {

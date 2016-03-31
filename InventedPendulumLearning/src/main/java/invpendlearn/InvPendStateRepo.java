@@ -2,19 +2,20 @@ package invpendlearn;
 
 import java.util.ArrayList;
 
-import gnu.trove.procedure.TIntProcedure;
+import com.github.davidmoten.rtree.Entry;
+import com.github.davidmoten.rtree.RTree;
+import com.github.davidmoten.rtree.geometry.Geometries;
+import com.github.davidmoten.rtree.geometry.Point;
+
 import invpendgraph.InvPendGraph;
 import invpendgraph.InvPendGraphConfiguration;
 import invpendgraph.InvPendGraphCreator;
 import invpendgraph.InvPendGraphNode;
-import rtree.Point;
-import rtree.RTree;
-import rtree.Rectangle;
+import rx.Observable;
 
 public class InvPendStateRepo {
 	private InvPendGraph graph;
-	private RTree tree;
-	private Rectangle[] rects;
+	private RTree<String, Point> tree;
 	private int size;
 	
 	//1.0, 1.0, 0.2, 0.2, 10, 10
@@ -26,51 +27,35 @@ public class InvPendStateRepo {
 		grcr.createGraph(model);
 		this.graph = grcr.getGraph();
 		
-		RTree tree = new RTree();
-		tree.init(null);		
-		Rectangle[] rects = new Rectangle[this.size];
+		RTree<String, Point> tree = RTree.star().create();
 		ArrayList<InvPendGraphNode> nodes = grcr.getGraph().getNodes();
 		for(int i = 0; i < this.size; i++) {
 			InvPendGraphNode n = nodes.get(i);
 			float x = (float) n.getState().getAngle();
 			float y = (float) n.getState().getAngVel();
-			Rectangle r = new Rectangle(x,y,x,y);
-			rects[i] = r;
-			tree.add(r, i);
+			tree = tree.add(Integer.toString(i), Geometries.point(x,y));
 		}
 		
-		this.rects = rects;
 		this.tree = tree;
 	}
 	
 	public ArrayList<InvPendGraphNode> getNNearestNodes(InvPendState state, int N) {
-		Point p = new Point((float)state.getAngle(), (float)state.getAngVel());
-		final ArrayList<Integer> rectIndecies = new ArrayList<Integer>();
-		tree.nearestN(
-				p,      // the point for which we want to find nearby rectangles
-				new TIntProcedure() {         // a procedure whose execute() method will be called with the results
-					public boolean execute(int i) {
-						rectIndecies.add(i);
-						return true;              // return true here to continue receiving results
-				    }
-				},
-				N,                            // the number of nearby rectangles to find
-				Float.MAX_VALUE               // Don't bother searching further than this. MAX_VALUE means search everything
-		);
-		
+		Point p = Geometries.point((float)state.getAngle(), (float)state.getAngVel());
+		Observable<Entry<String, Point>> results = tree.nearest(p, Double.POSITIVE_INFINITY, N);
+		Iterable<Entry<String, Point>> iterRes = results.toBlocking().toIterable();
 		ArrayList<InvPendGraphNode> resNodes = new ArrayList<InvPendGraphNode>();
 		
-		for (int i = 0; i<N; i++) {
-			InvPendState s = new InvPendState();
-			s.setAngle(rects[rectIndecies.get(i)].maxX);
-			s.setAngVel(rects[rectIndecies.get(i)].maxY);
-			//System.out.println(s.getAngle() + " " + s.getAngVel());
+		for (Entry<String, Point> e : iterRes) {
+			p = e.geometry();
+			InvPendState s = new InvPendState(p.x(), p.y());
 			InvPendGraphNode n = this.graph.searchNode(s, 0.00001);
-			
 			resNodes.add(n);
-			//System.out.println(n.getState().getAngle() + " " + n.getState().getAngVel());
 		}
 		
 		return resNodes;
+	}
+	
+	public InvPendGraph getGraph() {
+		return graph;
 	}
 }

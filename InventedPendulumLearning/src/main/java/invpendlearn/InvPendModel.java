@@ -79,7 +79,7 @@ public class InvPendModel extends RLEnvironmentModel {
 	}
 	
 	@Override
-	public RLState getNextState(RLState currS, RLAction a) {
+	public InvPendState getNextState(RLState currS, RLAction a) {
 		InvPendState nextS = simulate((InvPendState) currS, (InvPendAction) a, timeunit);
 		return nextS;
 	}	
@@ -197,12 +197,13 @@ public class InvPendModel extends RLEnvironmentModel {
 		double mu = this.mu;
 		double dt = tu;
 
-		double w = s.getAngVel();
 		double fi = s.getAngle();
+		double w = s.getAngVel();
 
 		double M = a.getMax();
 
 		w += (l * m * g * Math.sin(fi) + M - mu * w) / (l * l * m) * dt;
+		w += -Math.min((Math.signum(w) * 0.01), Math.abs(w));
 		fi += w * dt;
 
 		if (fi < -Math.PI)
@@ -213,8 +214,7 @@ public class InvPendModel extends RLEnvironmentModel {
 		InvPendState nextState = new InvPendState();
 		nextState.setAngle(fi);
 		nextState.setAngVel(w);
-
+		
 		return nextState;
 	}
-
 }

@@ -1,6 +1,8 @@
 package test;
 
 import invpendlearn.InvPendLearningEngine;
+import invpendlearn.InvPendModel;
+import invpendlearn.InvPendStateRepo;
 
 public class Test {
 
@@ -226,5 +228,11 @@ public class Test {
 		
 		InvPendLearningEngine engine = new InvPendLearningEngine();
 		engine.TdLamda(0.5, 100, 100, 10, 50);
+		
+		//RTree "stress" test
+//		InvPendLearningEngine engine = new InvPendLearningEngine();
+//		InvPendModel model = engine.getModel();		
+//		InvPendStateRepo repo = new InvPendStateRepo(model, -Math.PI, -5.0, 0.0628, 0.1, 100, 100);
+		
 	}
 }

@@ -15,9 +15,6 @@ public class InvPendUtilComputer {
 			for (int j = 0; j < 3; j++) {
 				InvPendGraphNode inode = nodes.get(i);
 				InvPendGraphNode jnode = nodes.get(j);
-				//System.out.println(i + "-" + j);				
-				//System.out.println(inode.getState().getAngle() + " " + inode.getState().getAngVel() + " " + inode.getIn().size() + " " + inode.getOut().size());
-				//System.out.println(jnode.getState().getAngle() + " " + jnode.getState().getAngVel() + " " + jnode.getIn().size() + " " + jnode.getOut().size());
 				if (inode.outContains(jnode) || inode.inContains(jnode)) {
 					edgeCount++;
 				}

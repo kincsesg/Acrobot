@@ -58,7 +58,7 @@ public class InvPendTrajectory {
 	public ArrayList<Double> getRewards(int stateNum, int horizon) {
 		ArrayList<Double> result = new ArrayList<Double>();
 		
-		for (int i = stateNum + 1; i <= stateNum + horizon; i++) {
+		for (int i = stateNum ; i <= stateNum + horizon; i++) {
 			if (i < this.states.size()) {
 				result.add(this.states.get(i).getReward());
 			}

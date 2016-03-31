@@ -12,9 +12,42 @@ public class InvPendLearningEngine {
 	private InvPendTrajectory trajectory;
 	private InvPendUtilComputer utilComp;
 
+	public InvPendModel getModel() {
+		return model;
+	}
+
+	public void setModel(InvPendModel model) {
+		this.model = model;
+	}
+
+	public InvPendStateRepo getStateRepo() {
+		return stateRepo;
+	}
+
+	public void setStateRepo(InvPendStateRepo stateRepo) {
+		this.stateRepo = stateRepo;
+	}
+
+	public InvPendTrajectory getTrajectory() {
+		return trajectory;
+	}
+
+	public void setTrajectory(InvPendTrajectory trajectory) {
+		this.trajectory = trajectory;
+	}
+
+	public InvPendUtilComputer getUtilComp() {
+		return utilComp;
+	}
+
+	public void setUtilComp(InvPendUtilComputer utilComp) {
+		this.utilComp = utilComp;
+	}
+
 	public InvPendLearningEngine() {
-		this.model = new InvPendModel(10, 1, 1, 0.03, 0.2);
-		this.stateRepo = new InvPendStateRepo(model, 1.0, 1.0, 0.2, 0.2, 10, 10);
+		//this.model = new InvPendModel(10, 1, 1, 0.03, 0.2);
+		this.model = new InvPendModel(10, 1, 0.1, 0.03, 0.2);
+		this.stateRepo = new InvPendStateRepo(model, -Math.PI, - 5.0, 0.1, 0.1, 62, 100);
 		this.trajectory = new InvPendTrajectory();
 		this.utilComp = new InvPendUtilComputer();
 	}
@@ -29,18 +62,12 @@ public class InvPendLearningEngine {
 			System.out.println(e + " episode");
 			trajectory = new InvPendTrajectory();
 			ArrayList<InvPendGraphNode> nodes = stateRepo.getNNearestNodes(startState, 3);
-			System.out.println(nodes.size());
-			System.out.println(nodes.get(0).getState().getAngle()+" "+nodes.get(0).getState().getAngVel());
-			System.out.println(nodes.get(1).getState().getAngle()+" "+nodes.get(1).getState().getAngVel());
-			System.out.println(nodes.get(2).getState().getAngle()+" "+nodes.get(2).getState().getAngVel());
 			InterpolatedUtil intU = utilComp.interpolateUtil(startState, nodes); //intU - U, ratios, deltaU
 			trajectory.add(intU, nodes, startState);
 			
+			currS = startState;
 			for (int step = 0; step < stepCount; step++) {
-				if (step == 0) {
-					currS = startState;
-				}
-				
+								
 				perform_a = chooseActionTdLambda(currS, actionPool);
 				InvPendState nextS = (InvPendState) model.getNextState(currS, perform_a);
 				
@@ -52,19 +79,18 @@ public class InvPendLearningEngine {
 				currS = nextS;
 				
 			}
-			
+			System.out.println(trajectory.getSize());
 			for (int i = 0; i < trajectory.getSize(); i++) {
+				System.out.println("i: " + i);	
 				double newU = 0.0;
 				ArrayList<Double> rews = trajectory.getRewards(i, learningHorizon); 
 				ArrayList<InvPendGraphNode> refrNodes = trajectory.getNodes(i);
 				InterpolatedUtil iu = utilComp.interpolateUtil(trajectory.getState(i), refrNodes);
-				for (int j = i; j < i+learningHorizon; j++) {
-					if (j < i+learningHorizon-1) {
-						newU = newU + (1-lambda) * Math.pow(lambda, j) * rews.get(j);
-					} else {
-						newU = newU + (1-lambda) * Math.pow(lambda, j) * (rews.get(j) + utilComp.interpolateUtil(trajectory.getState(j), trajectory.getNodes(j)).getU());
-					}
+				for (int j = 0; j < Math.min(learningHorizon, trajectory.getSize()-i); j++) {
+					System.out.println("j: " + j);
+					newU = newU + (1-lambda) * Math.pow(lambda, j) * rews.get(j);
 				}
+				trajectory.getState(i).setUtil(newU);//nem tudom van-e érteleme elrakni egy nem gráfbeli állapot u-ját, valszeg nincs				
 				
 				ArrayList<Double> ratios = iu.getRatios();
 				for (int k = 0; k<3; k++) {
@@ -76,6 +102,10 @@ public class InvPendLearningEngine {
 			
 			currS = startState;
 		}
+	}
+	
+	public InvPendAction simulateActionToTake(InvPendState currS, int actionPool){
+		return chooseActionTdLambda(currS, actionPool);
 	}
 	
 	private InvPendAction chooseActionTdLambda(InvPendState currS, int actionPool) {
