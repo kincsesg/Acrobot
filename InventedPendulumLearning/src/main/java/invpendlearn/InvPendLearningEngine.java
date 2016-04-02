@@ -47,13 +47,13 @@ public class InvPendLearningEngine {
 	public InvPendLearningEngine() {
 		//this.model = new InvPendModel(10, 1, 1, 0.03, 0.2);
 		this.model = new InvPendModel(10, 1, 0.1, 0.03, 0.2);
-		this.stateRepo = new InvPendStateRepo(model, -Math.PI, - 5.0, 0.1, 0.1, 62, 100);
+		//this.stateRepo = new InvPendStateRepo(model, -Math.PI, - 5.0, 0.1, 0.1, 62, 100);
+		this.stateRepo = new InvPendStateRepo(model, -Math.PI, - 5.0, 0.1, 0.1, 10, 10);
 		this.trajectory = new InvPendTrajectory();
 		this.utilComp = new InvPendUtilComputer();
 	}
 
 	public void TdLamda(double lambda, int eSize, int stepCount, int actionPool, int learningHorizon) {
-
 		InvPendState startState = new InvPendState(0.0, 0.0);
 		InvPendState currS = new InvPendState();
 		InvPendAction perform_a = new InvPendAction();
@@ -67,17 +67,14 @@ public class InvPendLearningEngine {
 			
 			currS = startState;
 			for (int step = 0; step < stepCount; step++) {
-								
 				perform_a = chooseActionTdLambda(currS, actionPool);
 				InvPendState nextS = (InvPendState) model.getNextState(currS, perform_a);
-				
 				
 				nodes = stateRepo.getNNearestNodes(nextS, 3);
 				intU = utilComp.interpolateUtil(nextS, nodes);
 				trajectory.add(intU, nodes, nextS);
 				
-				currS = nextS;
-				
+				currS = nextS;			
 			}
 			System.out.println(trajectory.getSize());
 			for (int i = 0; i < trajectory.getSize(); i++) {
@@ -89,6 +86,7 @@ public class InvPendLearningEngine {
 				for (int j = 0; j < Math.min(learningHorizon, trajectory.getSize()-i); j++) {
 					System.out.println("j: " + j);
 					newU = newU + (1-lambda) * Math.pow(lambda, j) * rews.get(j);
+					System.out.println("newU: " + newU);
 				}
 				trajectory.getState(i).setUtil(newU);//nem tudom van-e érteleme elrakni egy nem gráfbeli állapot u-ját, valszeg nincs				
 				
@@ -96,10 +94,8 @@ public class InvPendLearningEngine {
 				for (int k = 0; k<3; k++) {
 					double prevU = refrNodes.get(k).getState().getUtil();
 					refrNodes.get(k).getState().setUtil(prevU + ratios.get(k) * iu.getU());
-				}				
-			}
-			
-			
+				}			
+			}			
 			currS = startState;
 		}
 	}
@@ -119,7 +115,6 @@ public class InvPendLearningEngine {
 		InterpolatedUtil nextSIU = utilComp.interpolateUtil(nextS, stateRepo.getNNearestNodes(nextS, 3));
 		InvPendAction aTemp = new InvPendAction();
 		InvPendState nextSTemp = new InvPendState();
-		
 		
 		for (int i = 0; i<actionPool; i++) {
 			aTemp.setMin(r.nextDouble() * maxA - minA);

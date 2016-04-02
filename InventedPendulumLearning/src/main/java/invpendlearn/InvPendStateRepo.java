@@ -15,7 +15,7 @@ import rx.Observable;
 
 public class InvPendStateRepo {
 	private InvPendGraph graph;
-	private RTree<String, Point> tree;
+	private RTree<InvPendGraphNode, Point> tree;
 	private int size;
 	
 	//1.0, 1.0, 0.2, 0.2, 10, 10
@@ -27,13 +27,14 @@ public class InvPendStateRepo {
 		grcr.createGraph(model);
 		this.graph = grcr.getGraph();
 		
-		RTree<String, Point> tree = RTree.star().create();
-		ArrayList<InvPendGraphNode> nodes = grcr.getGraph().getNodes();
+		RTree<InvPendGraphNode, Point> tree = RTree.star().create();
+		
+		ArrayList<InvPendGraphNode> nodes = this.graph.getNodes();
 		for(int i = 0; i < this.size; i++) {
 			InvPendGraphNode n = nodes.get(i);
 			float x = (float) n.getState().getAngle();
 			float y = (float) n.getState().getAngVel();
-			tree = tree.add(Integer.toString(i), Geometries.point(x,y));
+			tree = tree.add(n, Geometries.point(x,y));
 		}
 		
 		this.tree = tree;
@@ -41,15 +42,12 @@ public class InvPendStateRepo {
 	
 	public ArrayList<InvPendGraphNode> getNNearestNodes(InvPendState state, int N) {
 		Point p = Geometries.point((float)state.getAngle(), (float)state.getAngVel());
-		Observable<Entry<String, Point>> results = tree.nearest(p, Double.POSITIVE_INFINITY, N);
-		Iterable<Entry<String, Point>> iterRes = results.toBlocking().toIterable();
+		Observable<Entry<InvPendGraphNode,Point>> results = tree.nearest(p, Double.POSITIVE_INFINITY, N);
+		Iterable<Entry<InvPendGraphNode, Point>> iterRes = results.toBlocking().toIterable();
 		ArrayList<InvPendGraphNode> resNodes = new ArrayList<InvPendGraphNode>();
 		
-		for (Entry<String, Point> e : iterRes) {
-			p = e.geometry();
-			InvPendState s = new InvPendState(p.x(), p.y());
-			InvPendGraphNode n = this.graph.searchNode(s, 0.00001);
-			resNodes.add(n);
+		for (Entry<InvPendGraphNode, Point> e : iterRes) {
+			resNodes.add(e.value());
 		}
 		
 		return resNodes;

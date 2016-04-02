@@ -2,7 +2,6 @@ package invpendgraph;
 
 import java.util.ArrayList;
 
-import invpendlearn.InvPendState;
 import rlgraph.RLGraph;
 
 public class InvPendGraph extends RLGraph {
@@ -26,16 +25,5 @@ public class InvPendGraph extends RLGraph {
 	
 	public void removeNode(InvPendGraphNode n) {
 		nodes.remove(n);
-	}
-
-	public InvPendGraphNode searchNode(InvPendState s, double treshold) {
-		InvPendGraphNode res = null;
-		for (InvPendGraphNode n : nodes) {
-			if (Math.abs(n.getState().getAngle()-s.getAngle()) <= treshold && Math.abs(n.getState().getAngVel()-s.getAngVel()) <= treshold) {
-				res = n;
-			}
-		}
-		
-		return res;
 	}
 }
